@@ -9,8 +9,6 @@ compress=false
 pairEnd=false
 isoform=false
 homolog=false
-adapterFile="/mnt/projects/SOM_PATH_RXS745U/bin/Trimmomatic-0.36/adapters"
-adapterFile="${adapterFile}/TruSeq3-SE.fa"
 genome=GRCh38
 acceptedGenome=("GRCh38" "Mmul_8" "MacFas5" "GRCm38")
 while getopts :d:e:g:a:cpioh option
@@ -53,6 +51,18 @@ if [ -z ${dirFastq+x} ]
 then
     echo "error...option -d required."
     exit 1
+fi
+
+# set default adapter file if not provided
+if [ -z $adapterFile ]
+then
+    adapterFile="/mnt/projects/SOM_PATH_RXS745U/bin/Trimmomatic-0.36/adapters"
+    if $pairEnd
+    then
+	adapterFile="${adapterFIle}/TruSeq3-PE-2.fa"
+    else
+	adapterFile="${adapterFile}/TruSeq3-SE.fa"
+    fi
 fi
 
 # test that directory contains seq files
