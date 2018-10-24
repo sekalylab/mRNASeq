@@ -463,11 +463,11 @@ then
     percentReverseStrand=$(grep -E '1\+\-|\"\+\-' $dirData/rseqc.infer.out | \
         sed -r 's/.+: //g')
     # if one of the percentage above 80% it will be considered stranded 
-    if (( $(echo "$percentRefStrand" | awk '{print ($1 >= 0.8)}') ))
+    if (( $(echo "$percentRefStrand" | awk '{print ($1 >= 0.75)}') ))
     then
         stranded="yes"
     fi
-    if (( $(echo "$percentReverseStrand" | awk '{print ($1 >= 0.8)}') ))
+    if (( $(echo "$percentReverseStrand" | awk '{print ($1 >= 0.75)}') ))
     then
         stranded="reverse"
     fi
