@@ -1,14 +1,14 @@
 #!/bin/bash
 # @author Slim Fourati
 # @author Aarthi Talla
-# @version 0.5
+# @version 0.6
 
 # load modules
 module load intel/17
 module load openmpi/2.0.1
 module load python2/2.7.13
-module load samtools/1.5
-module load STAR/2.5.3a
+module load samtools/1.8
+module load STAR/2.7.0e
 # module load xz/5.2.2 # module for pysam
 
 # read arguments
@@ -127,7 +127,7 @@ then
         # lauch FASTQC with option -o <outputFile> 
         #                          -t <numberOfParallelProcess>
         #                          -q quiet
-        perl $bin/FastQC-0.11.5/fastqc $sample \
+        perl $bin/FastQC-0.11.8/fastqc $sample \
 	    -o $sampleID$suffixe -t 8 -q
     done
     echo "done"
@@ -194,7 +194,7 @@ then
 	do
             # lauch trimmomatic
             java -Xmx1g \
-		-jar $bin/Trimmomatic-0.36/trimmomatic-0.36.jar PE \
+		-jar $bin/Trimmomatic-0.39/trimmomatic-0.39.jar PE \
 		-threads $maxProc \
 		-phred33 \
 		-trimlog ${sample}_trim.log \
@@ -230,7 +230,7 @@ then
 	do
             # lauch trimmomatic
             java -Xmx1g \
-		-jar $bin/Trimmomatic-0.36/trimmomatic-0.36.jar SE \
+		-jar $bin/Trimmomatic-0.39/trimmomatic-0.39.jar SE \
 		-threads $maxProc \
 		-phred33 \
 		-trimlog ${sample}_trim.log \
@@ -514,7 +514,7 @@ then
                     $sample \
                     $gtfFile \
                     > ${sampleID}_counts_transcript
-		python $bin/HTSeq-0.7.2/scripts/count.py \
+		python $bin/HTSeq-0.9.1/htseq-count \
                     --mode=union \
                     --stranded=$stranded \
                     --idattr=exon_id \

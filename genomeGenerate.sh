@@ -1,11 +1,10 @@
 #!/bin/bash
 # @author Slim Fourati (sxf279@case.edu)
 # @author Aarthi Talla (axt427@case.edu)
-# @version 0.3
+# @version 0.4
 
 # load apps
-module load gcc/6.3.0
-module load STAR/2.5.3a
+module load STAR/2.7.0e
 
 # read input arguments
 compress=false

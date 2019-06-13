@@ -1,7 +1,7 @@
 #!/bin/bash
 # @author Slim Fourati (sxf279@case.edu)
 # @author Aarthi Talla (axt427@case.edu)
-# @version 0.5
+# @version 0.6
 
 # read input arguments
 email="sxf279@case.edu"
@@ -56,7 +56,7 @@ fi
 # set default adapter file if not provided
 if [ -z $adapterFile ]
 then
-    adapterFile="/mnt/projects/SOM_PATH_RXS745U/bin/Trimmomatic-0.36/adapters"
+    adapterFile="/mnt/projects/SOM_PATH_RXS745U/bin/Trimmomatic-0.39/adapters"
     if $pairEnd
     then
 	adapterFile="${adapterFIle}/TruSeq3-PE-2.fa"
@@ -84,9 +84,8 @@ fi
 dirData=$(echo $dirFastq | sed -r 's|/$||g')
 dirData=$(echo $dirData | sed -r 's|/[^/]+$||g')
 
-# find number of files and determine batches
-# each batch consisting of 8 samples (16 files PE or 8 SE)
-batches=$((($nfiles - 1)/8 + 1))
+# find number of files
+batches=$nfiles
 
 # make directories for every batch and move batches of 8 samples into
 # their corresponding batch directory
@@ -97,9 +96,9 @@ do
     then
 	find $dirFastq -name "*_1.$suffix" | \
 	    sed -r "s/_1.${suffix}/_2.${suffix}/g" | \
-	    head -8 | xargs -i mv "{}" "$dirData/raw$i"
+	    head -1 | xargs -i mv "{}" "$dirData/raw$i"
     fi
-    find $dirFastq -name "*_1.$suffix" | head -8 | \
+    find $dirFastq -name "*_1.$suffix" | head -1 | \
         xargs -i mv "{}" "$dirData/raw$i"
 done
 
