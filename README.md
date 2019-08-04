@@ -50,5 +50,6 @@ p=[p]air-end sequencing files
 e=[e]mail address  
 i=[i]soform transcript/exon counts  
 o=use h[o]mology to annotate reads  
+n=align [n]on-host reads to ncbi nt database 
 h=print [h]elp
 ```

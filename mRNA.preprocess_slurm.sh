@@ -31,7 +31,8 @@ compress=false
 pairEnd=false
 isoform=false
 homolog=false
-while getopts d:g:m:a:cpio option
+nonHost=false
+while getopts d:g:m:a:cpion option
 do
     case "$option" in
         d) dirData=$OPTARG;;
@@ -42,6 +43,7 @@ do
 	p) pairEnd=true;;
 	i) isoform=true;;
 	o) homolog=true;;
+	n) nonHost=true;;
     esac
 done
 
@@ -73,6 +75,11 @@ fi
 if $homolog
 then
     cmd="$cmd -o"
+fi
+
+if $nonHost
+then
+    cmd="$cmd -n"
 fi
 
 # echo $cmd

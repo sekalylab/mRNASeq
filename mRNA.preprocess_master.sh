@@ -9,19 +9,22 @@ compress=false
 pairEnd=false
 isoform=false
 homolog=false
+nonHost=false
 genome=GRCh38
 acceptedGenome=("GRCh38" "Mmul_8" "MacFas5" "GRCm38")
-while getopts :d:e:g:a:cpioh option
+while getopts :d:e:g:a:m:cpinoh option
 do
     case "${option}" in
 	h) echo "Command: bash mRNA.preprocess_master.sh -d {fastq/directoryfastq} ..."
 	    echo "argument: d=[d]irectory with raw data (required)"
 	    echo "          g=reference [g]enome"
 	    echo "          a=path to FASTA files with [a]dapters to be trimmed"
+	    echo "          m=[m]ate length (integer)"
 	    echo "          c=raw files are [c]ompressed as DSRC files"
 	    echo "          p=[p]aired-end sequencing"
 	    echo "          i=[i]soform transcript/exon counts"
-	    echo "          o=use h[o]mology to annotate reads"  
+	    echo "          o=use h[o]mology to annotate reads"
+	    echo "          n=align [n]on-host reads to ncbi nt database"
 	    echo "          e=[e]mail address"
 	    echo "          h=print [h]elp"
 	    exit 1;;
@@ -37,6 +40,8 @@ do
 	p) pairEnd=true;;
 	o) homolog=true;;
 	i) isoform=true;;
+	n) nonHost=true;;
+	m) mateLength=$OPTARG;;
 	a) adapterFile=$OPTARG;;
 	\?) echo "Invalid option: -$OPTARG"
 	    exit 1;;
@@ -154,6 +159,11 @@ fi
 if $homolog
 then
     cmd="$cmd -o"
+fi
+
+if $nonHost
+then
+    cmd="$cmd -n"
 fi
 
 # echo $cmd

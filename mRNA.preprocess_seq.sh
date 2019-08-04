@@ -16,7 +16,8 @@ compress=false
 pairEnd=false
 isoform=false
 homolog=false
-while getopts d:g:m:a:cpoi option
+nonHost=false
+while getopts d:g:m:a:cponi option
 do
     case "$option" in
 	d) dirData=$OPTARG;;
@@ -27,6 +28,7 @@ do
 	p) pairEnd=true;;
 	o) homolog=true;;
 	i) isoform=true;;
+	n) nonHost=true;;
     esac
 done
 
@@ -311,8 +313,8 @@ then
 		 --readFilesCommand zcat \
 	  	 --runThreadN $maxProc \
  		 --outSAMtype BAM Unsorted \
-		 --outFileNamePrefix ${sample}_star &>/dev/null
-		 # --outReadsUnmapped Fastx
+		 --outFileNamePrefix ${sample}_star \
+		 --outReadsUnmapped Fastx &>/dev/null
             if [ $? != 0 ]
             then
 		echo -ne "error\n  unable to aligned read in directory $sample"
@@ -326,6 +328,11 @@ then
 	    if ! $isoform
 	    then
 		rm ${sample}_starSJ.out.tab
+	    fi
+	    if ! $nonHost
+	    then
+		rm ${sample}_starUnmapped.out.mate1
+		rm ${sample}_starUnmapped.out.mate2
 	    fi
 	done
     else
