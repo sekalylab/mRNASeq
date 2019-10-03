@@ -233,7 +233,7 @@ then
     sampleID=( $(echo $sampleID | tr ' ' '\n' | sort | uniq) )
     for sample in ${sampleID[@]}
     do
-            Rscropt $bin/homolog2counts.R \
+            Rscript $bin/homolog2counts.R \
                 --primary $sample.primary_genecounts \
                 --homolog $sample.homolog.samout
             # delete unused file
