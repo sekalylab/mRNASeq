@@ -1,6 +1,10 @@
 ## Sequencing pipeline 1 (S1)
 Contains scripts for mRNA-Seq preprocessing
 
+<!-- badges: start -->
+![GitHub last commit](https://img.shields.io/github/last-commit/sekalylab/mRNAseq)
+<!-- badges: end -->
+
 ## Dependencies
 - dsrc (version 2.00 or higher) [optional]
 - FastQC
