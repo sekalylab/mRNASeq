@@ -6,12 +6,12 @@ Contains scripts for mRNA-Seq preprocessing
 <!-- badges: end -->
 
 ## Dependencies
-- dsrc (version 2.00 or higher) [optional]
-- FastQC
-- RSeQC
-- Trimmomatic
-- STAR aligner (version 2.4.2a or higher)
-- HTSeq
+- dsrc (version 2.0.2) [optional]
+- FastQC (version 0.11.8) [optional]
+- RSeQC (version 3.0.1)
+- Trimmomatic (version 0.39)
+- STAR aligner (version 2.7.0e)
+- HTSeq (version 0.11.2)
 
 ## Usage
 #### Add python libraries to your PATH
@@ -21,7 +21,7 @@ shared directory `/mnt/rstor/SOM_PATH_RXS745U`. To be able to run the python
 based applications (HTSeq, RSeQC) you will need to append the path to the shared
 directory to the environment variable `$PYTHONPATH`.
 ```bash
-export PYTHONPATH="$PYTHONPATH:/mnt/rstor/SOM_PATH_RXS745U/lib/python2.7/site-packages"
+export PYTHONPATH="$PYTHONPATH:/mnt/rstor/SOM_PATH_RXS745U/lib/python3.7/site-packages"
 ```
 
 #### Rename raw sequencing files
