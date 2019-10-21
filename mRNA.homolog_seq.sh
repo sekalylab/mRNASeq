@@ -1,10 +1,11 @@
 #!/bin/bash
 
 # load packages
-module load intel/17
+module load gcc/6.3.0
 module load openmpi/2.0.1
-module load python2/2.7.13
-module load samtools/1.8
+module load python/3.7.0
+module load samtools/1.9
+module load R/3.5.3
 
 # read arguments
 while getopts d:g: option
@@ -225,9 +226,6 @@ if $flag
 then
     currentDate=$(date +"%Y-%m-%d %X")
     echo -ne "$currentDate: creating homolog gene counts..."
-    module load gcc/6.3.0
-    module load openmpi/2.0.1
-    module load R/3.5.3
 
     sampleID=$(find $dataDir -name "*.homolog.samout")
     sampleID=$(echo $sampleID | sed -r 's/.homolog.samout//g')

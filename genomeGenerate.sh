@@ -35,7 +35,7 @@ then
 	if $compress
 	then
 	    file=$(find $dirData -name "*.dsrc" | head -n 1)
-	    mateLength=$($bin/dsrc-2.0/dsrc d -s -t$maxProc $file | \
+	    mateLength=$($bin/dsrc-2.0.2/dsrc d -s -t$maxProc $file | \
 			     head -n 4000 | \
 			     awk 'NR%2==0 {print length($1)}' | \
 			     sort -rn | \

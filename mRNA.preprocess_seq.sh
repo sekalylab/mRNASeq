@@ -4,12 +4,11 @@
 # @version 0.6
 
 # load modules
-module load intel/17
+module load gcc/6.3.0
 module load openmpi/2.0.1
-module load python2/2.7.13
+module load python/3.7.0
 module load samtools/1.9
 module load STAR/2.7.0e
-# module load xz/5.2.2 # module for pysam
 
 # read arguments
 compress=false
@@ -88,7 +87,7 @@ then
         # format dirData/read{mateNumber}_index_{SampleName}.dsrc
         outputName=$(echo $sample | \
             sed -r 's/.dsrc/.fq.gz/g')
-        $bin/dsrc-2.0/dsrc d -s -t8 $sample | gzip > $outputName
+        $bin/dsrc-2.0.2/dsrc d -s -t8 $sample | gzip > $outputName
 	# delete dsrc file
         rm $sample
     done
@@ -458,7 +457,7 @@ then
     currentDate=$(date +"%Y-%m-%d %X")
     echo -ne "$currentDate: infering strand-specific experiment..."
     file=$(find $dirData -name "*.sorted.bam" | head -n 1)
-    $bin/RSeQC-2.6.4/infer_experiment.py \
+    $bin/RSeQC-3.0.1/infer_experiment.py \
 	-r $bedFile \
 	-i $file &> $dirData/rseqc.infer.out
     # extract from infer_experiment output percentage of reads mapping to
