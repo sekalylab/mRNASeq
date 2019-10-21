@@ -61,7 +61,7 @@ fi
 # set default adapter file if not provided
 if [ -z $adapterFile ]
 then
-    adapterFile="/mnt/projects/SOM_PATH_RXS745U/bin/Trimmomatic-0.39/adapters"
+    adapterFile="/mnt/rstor/SOM_PATH_RXS745U/bin/Trimmomatic-0.39/adapters"
     if $pairEnd
     then
 	adapterFile="${adapterFIle}/TruSeq3-PE-2.fa"
@@ -109,8 +109,8 @@ done
 
 # lauch genome indexing
 sed -ri "s|^#SBATCH --mail-user=.+$|#SBATCH --mail-user=${email}|g" \
-    genomeGenerate_slurm.sh
-cmd="sbatch genomeGenerate_slurm.sh -d $dirData/raw1 -g $genome"
+    genomeGenerate.slurm
+cmd="sbatch genomeGenerate.slurm -d $dirData/raw1 -g $genome"
 
 if [[ ! -z $mateLength ]]
 then
@@ -127,14 +127,14 @@ slurmid=$(eval $cmd | sed -r 's|Submitted batch job ([0-9]*)|\1|g')
 
 # modify preprocessing slurm script
 sed -ri "s|^#SBATCH --mail-user=.+$|#SBATCH --mail-user=${email}|g" \
-    mRNA.preprocess_slurm.sh
+    mRNA.preprocess.slurm
 sed -ri "s|^#SBATCH --array=1-.+$|#SBATCH --array=1-${batches}|g" \
-    mRNA.preprocess_slurm.sh
+    mRNA.preprocess.slurm
 sed -ri "s|^#SBATCH --depend=afterok:.+$|#SBATCH --depend=afterok:${slurmid}|g" \
-    mRNA.preprocess_slurm.sh
+    mRNA.preprocess.slurm
 
 # lauch preprocessing slurm script
-cmd="sbatch mRNA.preprocess_slurm.sh -d $dirData -g $genome -a $adapterFile"
+cmd="sbatch mRNA.preprocess.slurm -d $dirData -g $genome -a $adapterFile"
 
 if [[ ! -z $mateLength ]]
 then
@@ -173,12 +173,12 @@ if $homolog
 then
     # modify homology slurm script
     sed -ri "s|^#SBATCH --mail-user=.+$|#SBATCH --mail-user=${email}|g" \
-	mRNA.homolog_slurm.sh
+	mRNA.homolog.slurm
     sed -ri "s|^#SBATCH --array=1-.+$|#SBATCH --array=1-${batches}|g" \
-	mRNA.homolog_slurm.sh
+	mRNA.homolog.slurm
     sed -ri "s|^#SBATCH --depend=afterok:.+$|#SBATCH --depend=afterok:${slurmid}|g" \
-	mRNA.homolog_slurm.sh
+	mRNA.homolog.slurm
     # lauch preprocessing slurm script
-    cmd="sbatch mRNA.homolog_slurm.sh -d $dirData -g $genome"
+    cmd="sbatch mRNA.homolog.slurm -d $dirData -g $genome"
     eval $cmd
 fi

@@ -1,7 +1,7 @@
 #!/bin/bash
 # @author Slim Fourati (sxf279@case.edu)
 # @author Aarthi Talla (axt427@case.edu)
-# @version 0.4
+# @version 0.5
 
 # load apps
 module load STAR/2.7.0e
@@ -19,8 +19,8 @@ do
 done
 
 # set global variables for the script
-bin="/mnt/projects/SOM_PATH_RXS745U/bin"
-genomeDir="/mnt/projects/SOM_PATH_RXS745U/genome/${genome}"
+bin="/mnt/rstor/SOM_PATH_RXS745U/bin"
+genomeDir="/mnt/rstor/SOM_PATH_RXS745U/genome/${genome}"
 genomeFasta="$genomeDir/Sequence/genome.fa"
 gtfFile="$genomeDir/Annotation/genes.gtf"
 maxProc=8

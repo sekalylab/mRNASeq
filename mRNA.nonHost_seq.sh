@@ -13,7 +13,7 @@ do
 done
 
 # set global variables for the script
-bin="/mnt/projects/SOM_PATH_RXS745U/bin"
+bin="/mnt/rstor/SOM_PATH_RXS745U/bin"
 maxProc=8
 
 # extract host mismatch reads

@@ -7,7 +7,7 @@
 module load intel/17
 module load openmpi/2.0.1
 module load python2/2.7.13
-module load samtools/1.8
+module load samtools/1.9
 module load STAR/2.7.0e
 # module load xz/5.2.2 # module for pysam
 
@@ -33,8 +33,8 @@ do
 done
 
 # set global variables for the script
-bin="/mnt/projects/SOM_PATH_RXS745U/bin"
-seqDependencies="/mnt/projects/SOM_PATH_RXS745U/genome/$genome"
+bin="/mnt/rstor/SOM_PATH_RXS745U/bin"
+seqDependencies="/mnt/rstor/SOM_PATH_RXS745U/genome/$genome"
 genomeFasta="$seqDependencies/Sequence/genome.fa"
 gtfFile="$seqDependencies/Annotation/genes.gtf"
 bedFile="$seqDependencies/Annotation/genes.bed"
@@ -283,17 +283,17 @@ then
 fi
 
 
-# 7. Alignment with 'STAR'                                                      
-# Alignment of the reads to the reference genome are perfermed on the         
-# 'trimmed.fastq' files.                                                      
-# The genome is loaded into memory for alignment.                             
-# After the end of alignment, the genome is removed from shared memory.       
-# Lauch STAR with options:                                                    
-#   genomeDir         :  <path/to/dir/where genome has been generated>        
-#   genomeLoad        : <mode of shared memory usage for the genome files>    
-#   readFilesIn       : <mate_1.trimmed.fastq> <mate_2.trimmed.fastq>         
-#   runThreadN        : <numberOfParallelProcess>                             
-#   outFileNamePrefix : <prefixOutputFiles>                                   
+# 7. Alignment with 'STAR'
+# Alignment of the reads to the reference genome are perfermed on the
+# 'trimmed.fastq' files.
+# The genome is loaded into memory for alignment.
+# After the end of alignment, the genome is removed from shared memory.
+# Lauch STAR with options:
+#   genomeDir         :  <path/to/dir/where genome has been generated>
+#   genomeLoad        : <mode of shared memory usage for the genome files>
+#   readFilesIn       : <mate_1.trimmed.fastq> <mate_2.trimmed.fastq>
+#   runThreadN        : <numberOfParallelProcess>
+#   outFileNamePrefix : <prefixOutputFiles>
 flag=true
 if $flag
 then
@@ -501,7 +501,7 @@ then
     do
         (
             sampleID=$(echo $sample | sed -r 's/(.?).sorted.bam$/\1/')
-            $bin/HTSeq-0.9.1/htseq-count \
+            $bin/HTSeq-0.11.2/htseq-count \
                 --mode=union \
                 --stranded=$stranded \
                 --idattr=gene_id \
@@ -512,7 +512,7 @@ then
                 > ${sampleID}_counts_gene
 	    if $isoform
 	    then
-		$bin/HTSeq-0.9.1/htseq-count \
+		$bin/HTSeq-0.11.2/htseq-count \
                     --mode=union \
                     --stranded=$stranded \
                     --idattr=transcript_id \
@@ -521,7 +521,7 @@ then
                     $sample \
                     $gtfFile \
                     > ${sampleID}_counts_transcript
-		python $bin/HTSeq-0.9.1/htseq-count \
+		python $bin/HTSeq-0.11.2/htseq-count \
                     --mode=union \
                     --stranded=$stranded \
                     --idattr=exon_id \

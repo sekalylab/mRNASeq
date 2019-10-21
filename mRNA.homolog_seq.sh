@@ -4,7 +4,7 @@
 module load intel/17
 module load openmpi/2.0.1
 module load python2/2.7.13
-module load samtools/1.5
+module load samtools/1.8
 
 # read arguments
 while getopts d:g: option
@@ -16,8 +16,8 @@ do
 done
 
 # set global variables for the script
-bin="/mnt/projects/SOM_PATH_RXS745U/bin"
-genomeDir="/mnt/projects/SOM_PATH_RXS745U/genome/$genome"
+bin="/mnt/rstor/SOM_PATH_RXS745U/bin"
+genomeDir="/mnt/rstor/SOM_PATH_RXS745U/genome/$genome"
 gtfFile="$genomeDir/Annotation/genes.gtf"
 bedFile="$genomeDir/Annotation/genes.bed"
 homologFile="$genomeDir/Annotation/homolog.gtf"
@@ -67,14 +67,14 @@ then
     sampleID=( $(echo $sampleID | tr ' ' '\n' | sort | uniq) )
     for sample in ${sampleID[@]}
     do
-	$bin/sambamba-0.6.6/sambamba_v0.6.6 \
+	$bin/sambamba-0.7.0/sambamba-0.7.0-linux-static \
 	    view \
 	    -h \
 	    -F "not secondary_alignment" \
 	    -t 8 \
 	    $sample.sorted.bam | \
 	    sed -r 's/NH:i:[0-9]+/NH:i:1/g' | \
-	    $bin/sambamba-0.6.6/sambamba_v0.6.6 \
+	    $bin/sambamba-0.7.0/sambamba-0.7.0-linux-static \
 		view \
 		-f bam \
 		-h \
@@ -126,7 +126,7 @@ then
     sampleID=( $(echo $sampleID | tr ' ' '\n' | sort | uniq) )
     for sample in ${sampleID[@]}
     do
-	    $bin/HTSeq-0.9.1/htseq-count \
+	    $bin/HTSeq-0.11.2/htseq-count \
 		--mode=union \
 		--stranded=$stranded \
 		--idattr=gene_id \
@@ -172,14 +172,14 @@ then
     sampleID=( $(echo $sampleID | tr ' ' '\n' | sort | uniq) )
     for sample in ${sampleID[@]}
     do
-	    $bin/sambamba-0.6.6/sambamba_v0.6.6 view \
+	    $bin/sambamba-0.7.0/sambamba-0.7.0-linux-static \
 		-H $sample.primary.bam > $sample.nofeature.sam
-	    $bin/sambamba-0.6.6/sambamba_v0.6.6 view \
+	    $bin/sambamba-0.7.0/sambamba-0.7.0-linux-static \
 		$sample.primary.bam |
 		paste - <(cut -sf 2 $sample.primary.samout) |
 		grep "__no_feature" |
 		cut -sf 1-15 >> $sample.nofeature.sam
-	    $bin/sambamba-0.6.6/sambamba_v0.6.6 view \
+	    $bin/sambamba-0.7.0/sambamba-0.7.0-linux-static \
 		-h -b $sample.nofeature.sam > $sample.nofeature.bam
 	    # delete temporary files
 	    rm $sample.nofeature.sam
@@ -200,7 +200,7 @@ then
     sampleID=( $(echo $sampleID | tr ' ' '\n' | sort | uniq) ) 
     for sample in ${sampleID[@]}
     do
-            $bin/HTSeq-0.9.1/htseq-count \
+            $bin/HTSeq-0.11.2/htseq-count \
 		--mode=union \
 		--stranded=$stranded \
 		--idattr=gene_id \
@@ -226,7 +226,8 @@ then
     currentDate=$(date +"%Y-%m-%d %X")
     echo -ne "$currentDate: creating homolog gene counts..."
     module load gcc/6.3.0
-    module load R/3.4.2
+    module load openmpi/2.0.1
+    module load R/3.5.3
 
     sampleID=$(find $dataDir -name "*.homolog.samout")
     sampleID=$(echo $sampleID | sed -r 's/.homolog.samout//g')

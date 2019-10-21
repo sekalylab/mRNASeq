@@ -17,11 +17,11 @@ Contains scripts for mRNA-Seq preprocessing
 #### Add python libraries to your PATH
 The different applications and libraries used to run the preprocessing pipelines
 have been installed on the CWRU high-performance computing (HPC) cluster, in the
-shared directory `/mnt/projects/SOM_PATH_RXS745U`. To be able to run the python
+shared directory `/mnt/rstor/SOM_PATH_RXS745U`. To be able to run the python
 based applications (HTSeq, RSeQC) you will need to append the path to the shared
 directory to the environment variable `$PYTHONPATH`.
 ```bash
-export PYTHONPATH="$PYTHONPATH:/mnt/projects/SOM_PATH_RXS745U/lib/python2.7/site-packages"
+export PYTHONPATH="$PYTHONPATH:/mnt/rstor/SOM_PATH_RXS745U/lib/python2.7/site-packages"
 ```
 
 #### Rename raw sequencing files
