@@ -181,8 +181,7 @@ fi
 #   TRAILING                       : <minQuality>
 #   SLIDINGWINDOW                  : <windowLength>:<minQuality>
 #   MINLEN                         : <minLength>
-flag=true
-if $flag
+if [[ ! -z $adapterFile ]]
 then
     currentDate=$(date +"%Y-%m-%d %X")
     echo -ne "$currentDate: trimming reads..."
@@ -222,6 +221,9 @@ then
             rm ${sample}_2.unpaired.fq.gz
             rm ${sample}_trim.log
 	    rm ${sample}_trim.err
+	    # rename trimmed files
+	    mv ${sample}_1.trimmed.fq.gz ${sample}_1.fq.gz
+	    mv ${sample}_2.trimmed.fq.gz ${sample}_2.fq.gz
 	done
     else
 	sampleID=$(find $dirData -name "*_1.fq.gz")
@@ -249,8 +251,10 @@ then
 		exit
             fi
             # deleting unuse files
-	    rm ${sample}_1.fq.gz;
-            rm ${sample}_trim.log;
+	    rm ${sample}_1.fq.gz
+            rm ${sample}_trim.log
+	    # rename trimmed files
+	    mv ${sample}_1.trimmed.fq.gz ${sample}_1.fq.gz
 	done	
     fi
     echo "done"
@@ -283,14 +287,13 @@ fi
 
 
 # 7. Alignment with 'STAR'
-# Alignment of the reads to the reference genome are perfermed on the
-# 'trimmed.fastq' files.
+# Alignment of the reads to the reference genome.
 # The genome is loaded into memory for alignment.
 # After the end of alignment, the genome is removed from shared memory.
 # Lauch STAR with options:
 #   genomeDir         :  <path/to/dir/where genome has been generated>
 #   genomeLoad        : <mode of shared memory usage for the genome files>
-#   readFilesIn       : <mate_1.trimmed.fastq> <mate_2.trimmed.fastq>
+#   readFilesIn       : <mate_1.fq.gz> <mate_2.fq.gz>
 #   runThreadN        : <numberOfParallelProcess>
 #   outFileNamePrefix : <prefixOutputFiles>
 flag=true
@@ -300,15 +303,15 @@ then
     echo -ne "$currentDate: alignment of reads..."
     if $pairEnd
     then
-	sampleID=$(find $dirData -name "*_[1-2].trimmed.fq.gz")
-	sampleID=$(echo $sampleID | sed -r 's/_[1-2].trimmed.fq.gz//g')
+	sampleID=$(find $dirData -name "*_[1-2].fq.gz")
+	sampleID=$(echo $sampleID | sed -r 's/_[1-2].fq.gz//g')
 	sampleID=( $(echo $sampleID | tr ' ' '\n' | sort | uniq) )
 	for sample in ${sampleID[@]}
 	do
             STAR --genomeDir $genomeDir \
 		 --genomeLoad LoadAndKeep \
-		 --readFilesIn ${sample}_1.trimmed.fq.gz \
-		 ${sample}_2.trimmed.fq.gz \
+		 --readFilesIn ${sample}_1.fq.gz \
+		 ${sample}_2.fq.gz \
 		 --readFilesCommand zcat \
 	  	 --runThreadN $maxProc \
  		 --outSAMtype BAM Unsorted \
@@ -319,9 +322,9 @@ then
 		echo -ne "error\n  unable to aligned read in directory $sample"
 		exit 1
             fi
-            # delete trimmed FASTQ
-            rm ${sample}_1.trimmed.fq.gz
-	    rm ${sample}_2.trimmed.fq.gz
+            # delete raw FASTQ
+            rm ${sample}_1.fq.gz
+	    rm ${sample}_2.fq.gz
 	    rm ${sample}_starLog.out
 	    rm ${sample}_starLog.progress.out
 	    if ! $isoform
@@ -335,14 +338,14 @@ then
 	    fi
 	done
     else
-	sampleID=$(find $dirData -name "*_1.trimmed.fq.gz")
-	sampleID=$(echo $sampleID | sed -r 's/_1.trimmed.fq.gz//g')
+	sampleID=$(find $dirData -name "*_1.fq.gz")
+	sampleID=$(echo $sampleID | sed -r 's/_1.fq.gz//g')
 	sampleID=( $(echo $sampleID | tr ' ' '\n' | sort | uniq) )
 	for sample in ${sampleID[@]}
 	do
             STAR --genomeDir $genomeDir \
 		 --genomeLoad LoadAndKeep \
-		 --readFilesIn ${sample}_1.trimmed.fq.gz \
+		 --readFilesIn ${sample}_1.fq.gz \
 		 --readFilesCommand zcat \
 	         --runThreadN 8 \
        		 --outSAMtype BAM Unsorted \
@@ -358,8 +361,8 @@ then
 		echo -ne "error\n  unable to aligned read in directory $sample"
 		exit
             fi
-            # delete trimmed FASTQ
-            rm ${sample}_1.trimmed.fq.gz
+            # delete raw FASTQ
+            rm ${sample}_1.fq.gz
 	    # rm ${sample}_starAligned.out.bam
 	    rm ${sample}_starLog.out
 	    rm ${sample}_starLog.progress.out	

@@ -13,15 +13,15 @@
 #SBATCH --output=mrna.nonhost_%a.out
 
 # number of nodes and processors, memory required
-#SBATCH --tasks=24
-#SBATCH --mem=120gb
+#SBATCH --tasks=1
+#SBATCH --mem=256gb
 #SBATCH --partition=smp
 
 # time requirements
 #SBATCH --time=72:00:00
 
 # dependencies
-#SBATCH --depend=afterok:$SLURM_JOB_ID
+#SBATCH --depend=afterok:SLURM_JOB_ID
 
 # create array
 #SBATCH --array=1-BATCH

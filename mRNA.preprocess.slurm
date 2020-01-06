@@ -50,7 +50,11 @@ done
 # launch executable script
 cmd="bash mRNA.preprocess_seq.sh -d $dirData/raw$SLURM_ARRAY_TASK_ID"
 cmd="$cmd -g $genome"
-cmd="$cmd -a $adapterFile"
+
+if [[ ! -z $adapterFile ]]
+then
+    cmd="$cmd -a $adapterFile"
+fi
 
 if [[ ! -z $mateLength ]]
 then

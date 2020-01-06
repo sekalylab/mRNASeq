@@ -19,7 +19,7 @@
 #SBATCH --partition=smp
 
 # dependencies
-#SBATCH --depend=afterok:$SLURM_JOB_ID
+#SBATCH --depend=afterok:SLURM_JOB_ID
 
 # time requirements
 #SBATCH --time=72:00:00

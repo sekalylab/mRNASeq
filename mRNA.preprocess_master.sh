@@ -11,7 +11,8 @@ isoform=false
 homolog=false
 nonHost=false
 genome=GRCh38
-acceptedGenome=("GRCh38" "Mmul_8" "MacFas5" "GRCm38")
+acceptedGenome=("GRCh38" "Mmul_10" "MacFas5" "GRCm38")
+
 while getopts :d:e:g:a:m:cpinoh option
 do
     case "${option}" in
@@ -56,18 +57,6 @@ if [ -z ${dirFastq+x} ]
 then
     echo "error...option -d required."
     exit 1
-fi
-
-# set default adapter file if not provided
-if [ -z $adapterFile ]
-then
-    adapterFile="/mnt/rstor/SOM_PATH_RXS745U/bin/Trimmomatic-0.39/adapters"
-    if $pairEnd
-    then
-	adapterFile="${adapterFIle}/TruSeq3-PE-2.fa"
-    else
-	adapterFile="${adapterFile}/TruSeq3-SE.fa"
-    fi
 fi
 
 # test that directory contains seq files
@@ -134,7 +123,12 @@ sed -ri "s|^#SBATCH --depend=afterok:.+$|#SBATCH --depend=afterok:${slurmid}|g" 
     mRNA.preprocess.slurm
 
 # lauch preprocessing slurm script
-cmd="sbatch mRNA.preprocess.slurm -d $dirData -g $genome -a $adapterFile"
+cmd="sbatch mRNA.preprocess.slurm -d $dirData -g $genome"
+
+if [[ ! -z $adapterFile ]]
+then
+    cmd="$cmd -a $adapterFile"
+fi
 
 if [[ ! -z $mateLength ]]
 then
@@ -180,5 +174,21 @@ then
 	mRNA.homolog.slurm
     # lauch preprocessing slurm script
     cmd="sbatch mRNA.homolog.slurm -d $dirData -g $genome"
+    # echo $cmd
+    eval $cmd
+fi
+
+if $nonHost
+then
+    # modify non-host slurm script
+    sed -ri "s|^#SBATCH --mail-user=.+$|#SBATCH --mail-user=${email}|g" \
+	mRNA.nonHost.slurm
+    sed -ri "s|^#SBATCH --array=1-.+$|#SBATCH --array=1-${batches}|g" \
+	mRNA.nonHost.slurm
+    sed -ri "s|^#SBATCH --depend=afterok:.+$|#SBATCH --depend=afterok:${slurmid}|g" \
+	mRNA.nonHost.slurm
+    # lauch preprocessing slurm script
+    cmd="sbatch mRNA.nonHost.slurm -d $dirData"
+    # echo $cmd
     eval $cmd
 fi
