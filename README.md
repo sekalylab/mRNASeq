@@ -22,6 +22,7 @@ based applications (HTSeq, RSeQC) you will need to append the path to the shared
 directory to the environment variable `$PYTHONPATH`.
 ```bash
 export PYTHONPATH="$PYTHONPATH:/mnt/rstor/SOM_PATH_RXS745U/lib/python3.7/site-packages"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/mnt/rstor/SOM_PATH_RXS745U/lib"
 ```
 
 #### Rename raw sequencing files

@@ -16,6 +16,7 @@
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32gb
+#SBATCH --exclusive
 
 # time requirements
 #SBATCH --time=72:00:00
