@@ -87,7 +87,7 @@ then
         # format dirData/read{mateNumber}_index_{SampleName}.dsrc
         outputName=$(echo $sample | \
             sed -r 's/.dsrc/.fq.gz/g')
-        $bin/dsrc-2.0.2/dsrc d -s -t8 $sample | gzip > $outputName
+        $bin/dsrc-2.0.2/dsrc d -s -t$maxProc $sample | gzip > $outputName
 	# delete dsrc file
         rm $sample
     done
@@ -347,15 +347,10 @@ then
 		 --genomeLoad LoadAndKeep \
 		 --readFilesIn ${sample}_1.fq.gz \
 		 --readFilesCommand zcat \
-	         --runThreadN 8 \
+	         --runThreadN $maxProc \
        		 --outSAMtype BAM Unsorted \
 		 --outFileNamePrefix ${sample}_star \
-	         --outReadsUnmapped Fastx \
-       		 --outFilterMismatchNoverLmax 0.05 \
-		 --outFilterMatchNmin 16 \
-		 --outFilterScoreMinOverLread 0 \
-		 --outFilterMatchNminOverLread 0 \
-		 --alignIntronMax 1 &>/dev/null                    
+	         --outReadsUnmapped Fastx &>/dev/null                    
             if [ $? != 0 ]
             then
 		echo -ne "error\n  unable to aligned read in directory $sample"
@@ -363,9 +358,12 @@ then
             fi
             # delete raw FASTQ
             rm ${sample}_1.fq.gz
-	    # rm ${sample}_starAligned.out.bam
 	    rm ${sample}_starLog.out
-	    rm ${sample}_starLog.progress.out	
+	    rm ${sample}_starLog.progress.out
+	    if ! $nonHost
+	    then
+                rm ${sample}_starUnmapped.out.mate1
+            fi
 	done
     fi
     echo "done"

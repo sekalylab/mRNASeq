@@ -27,14 +27,22 @@
 #SBATCH --array=1-BATCH
 
 # initialize directories
-while getopts d: option
+pairEnd=false
+while getopts d:p option
 do
     case "$option" in
         d) dirData=$OPTARG;;
+	p) pairEnd=true;;
     esac
 done
 
 # launch executable script
 cmd="bash mRNA.nonHost_seq.sh -d $dirData/raw$SLURM_ARRAY_TASK_ID"
+
+if $pairEnd
+then
+    cmd="$cmd -p"
+fi
+
 # echo $cmd
 eval $cmd

@@ -189,6 +189,12 @@ then
 	mRNA.nonHost.slurm
     # lauch preprocessing slurm script
     cmd="sbatch mRNA.nonHost.slurm -d $dirData"
+
+    if $pairEnd
+    then
+	cmd="$cmd -p"
+    fi
+
     # echo $cmd
     eval $cmd
 fi
