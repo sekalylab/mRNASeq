@@ -42,7 +42,7 @@ bash mRNA.preprocessing_master.sh -d {raw_directory}
 arguments:  
 d=[d]irectory with raw data (directory; required)  
 g=reference [g]enome  
-    accepted values: GRC3h8, Mmul_10, GRCm38, MacFas5 
+    accepted values: GRCh38, Mmul_10, GRCm38, MacFas5, MusPutFur1.0
 a=FASTA file with [a]dapters sequences (file)  
     default value: TruSeq3-SE.fa  
 m=[m]ate length (integer)  

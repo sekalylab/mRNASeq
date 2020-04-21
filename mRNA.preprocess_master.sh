@@ -11,7 +11,7 @@ isoform=false
 homolog=false
 nonHost=false
 genome=GRCh38
-acceptedGenome=("GRCh38" "Mmul_10" "MacFas5" "GRCm38")
+acceptedGenome=("GRCh38" "Mmul_10" "MacFas5" "GRCm38" "MusPutFur1.0")
 
 while getopts :d:e:g:a:m:cpinoh option
 do
