@@ -1,32 +1,18 @@
 #!/bin/bash
-# @author Slim Fourati (sxf279@case.edu)
-# @author Aarthi Talla (axt427@case.edu)
-# @version 0.6
+# @author Slim Fourati (slim.fourati@emory.edu)
+# @version 0.7
 
 # read input arguments
-email="sxf279@case.edu"
-compress=false
-pairEnd=false
-isoform=false
-homolog=false
-nonHost=false
+email="slim.fourati@emory.edu"
 genome=GRCh38
-acceptedGenome=("GRCh38" "Mmul_10" "MacFas5" "GRCm38" "MusPutFur1.0")
+acceptedGenome=("GRCh38" "Mmul_10")
 
-while getopts :d:e:g:a:m:cpinoh option
+while getopts :d:e:g:h option
 do
     case "${option}" in
 	h) echo "Command: bash mRNA.preprocess_master.sh -d {fastq/directoryfastq} ..."
 	    echo "argument: d=[d]irectory with raw data (required)"
 	    echo "          g=reference [g]enome"
-	    echo "          a=path to FASTA files with [a]dapters to be trimmed"
-	    echo "          m=[m]ate length (integer)"
-	    echo "          c=raw files are [c]ompressed as DSRC files"
-	    echo "          p=[p]aired-end sequencing"
-	    echo "          i=[i]soform transcript/exon counts"
-	    echo "          o=use h[o]mology to annotate reads"
-	    echo "          n=align [n]on-host reads to ncbi nt database"
-	    echo "          e=[e]mail address"
 	    echo "          h=print [h]elp"
 	    exit 1;;
 	d) dirFastq=$OPTARG;;
@@ -37,13 +23,6 @@ do
 		echo "Invalid -g argument: choose between ${acceptedGenome[@]}"
 		exit 1
 	    fi;;
-	c) compress=true;;
-	p) pairEnd=true;;
-	o) homolog=true;;
-	i) isoform=true;;
-	n) nonHost=true;;
-	m) mateLength=$OPTARG;;
-	a) adapterFile=$OPTARG;;
 	\?) echo "Invalid option: -$OPTARG"
 	    exit 1;;
 	:)
@@ -60,12 +39,7 @@ then
 fi
 
 # test that directory contains seq files
-if $compress
-then
-    suffix="dsrc"
-else
-    suffix="fq.gz"
-fi
+suffix="fq.gz"
 nfiles=$(find $dirFastq -name "*_1.$suffix" | wc -l)
 if [ $nfiles -lt 1 ]
 then
@@ -73,128 +47,49 @@ then
     exit 1
 fi
 
-# initialize directories
-# remove trailing back slash 
-dirData=$(echo $dirFastq | sed -r 's|/$||g')
-dirData=$(echo $dirData | sed -r 's|/[^/]+$||g')
-
-# find number of files
-batches=$nfiles
-
-# make directories for every batch and move batches of 8 samples into
-# their corresponding batch directory
-for i in `seq 1 $batches`
-do
-    mkdir -p $dirData/raw$i
-    if $pairEnd
-    then
-	find $dirFastq -name "*_1.$suffix" | \
-	    sed -r "s/_1.${suffix}/_2.${suffix}/g" | \
-	    head -1 | xargs -i mv "{}" "$dirData/raw$i"
-    fi
-    find $dirFastq -name "*_1.$suffix" | head -1 | \
-        xargs -i mv "{}" "$dirData/raw$i"
-done
+# initialize directory
+dirData=$(echo $dirFastq | sed -r "s|efs/||g")
 
 # lauch genome indexing
-sed -ri "s|^#SBATCH --mail-user=.+$|#SBATCH --mail-user=${email}|g" \
-    genomeGenerate.slurm
-cmd="sbatch genomeGenerate.slurm -d $dirData/raw1 -g $genome"
+sed -ri "s|\"jobName\": \"rnaseq-job-TIMESTAMP\",|\"jobName\": \"rnaseq-job-$(date +%Y%m%d%M%S)\",|g" \
+    genomeGenerate.json
+sed -ri "s|\"-d\",.+$|\"-d\",\"${dirData}\",|g" \
+    genomeGenerate.json
+sed -ri "s|\"-g\",.+$|\"-g\",\"${genome}\"|g" \
+    genomeGenerate.json
 
-if [[ ! -z $mateLength ]]
-then
-    cmd="$cmd -m $mateLength"
-fi
+# copy script on mount
+cp genomeGenerate.sh /mnt/efs/
 
-if $compress
-then
-    cmd="$cmd -c"
-fi
-
-# echo $cmd
-slurmid=$(eval $cmd | sed -r 's|Submitted batch job ([0-9]*)|\1|g')
-
-# modify preprocessing slurm script
-sed -ri "s|^#SBATCH --mail-user=.+$|#SBATCH --mail-user=${email}|g" \
-    mRNA.preprocess.slurm
-sed -ri "s|^#SBATCH --array=1-.+$|#SBATCH --array=1-${batches}|g" \
-    mRNA.preprocess.slurm
-sed -ri "s|^#SBATCH --depend=afterok:.+$|#SBATCH --depend=afterok:${slurmid}|g" \
-    mRNA.preprocess.slurm
-
-# lauch preprocessing slurm script
-cmd="sbatch mRNA.preprocess.slurm -d $dirData -g $genome"
-
-if [[ ! -z $adapterFile ]]
-then
-    cmd="$cmd -a $adapterFile"
-fi
-
-if [[ ! -z $mateLength ]]
-then
-    cmd="$cmd -m $mateLength"
-fi
-
-if $compress
-then
-    cmd="$cmd -c"
-fi
-
-if $pairEnd
-then
-    cmd="$cmd -p"
-fi
-
-if $isoform
-then
-    cmd="$cmd -i"
-fi
-
-if $homolog
-then
-    cmd="$cmd -o"
-fi
-
-if $nonHost
-then
-    cmd="$cmd -n"
-fi
+cmd="aws batch submit-job"
+cmd="$cmd --cli-input-json file://genomeGenerate.json"
+cmd="$cmd --profile 'tki-aws-account-310-rhedcloud/RHEDcloudAdministratorRole'"
 
 # echo $cmd
-slurmid=$(eval $cmd | sed -r 's|Submitted batch job ([0-9]*)|\1|g')
+jobid=$(eval $cmd | \
+	    grep jobId | \
+	    sed -r 's|.+jobId\": \"(.+)\"$|\1|g')
 
-if $homolog
-then
-    # modify homology slurm script
-    sed -ri "s|^#SBATCH --mail-user=.+$|#SBATCH --mail-user=${email}|g" \
-	mRNA.homolog.slurm
-    sed -ri "s|^#SBATCH --array=1-.+$|#SBATCH --array=1-${batches}|g" \
-	mRNA.homolog.slurm
-    sed -ri "s|^#SBATCH --depend=afterok:.+$|#SBATCH --depend=afterok:${slurmid}|g" \
-	mRNA.homolog.slurm
-    # lauch preprocessing slurm script
-    cmd="sbatch mRNA.homolog.slurm -d $dirData -g $genome"
-    # echo $cmd
-    eval $cmd
-fi
+# modify preprocessing json
+sed -ri "s|\"jobName\": \"rnaseq-job-TIMESTAMP\",|\"jobName\": \"rnaseq-job-$(date +%Y%m%d%M%S)\",|g" \
+    mRNA.preprocess_seq.json
+sed -ri "s|\"jobId\":.+$|\"jobId\": \"${jobid}\"|g" \
+    mRNA.preprocess_seq.json
+sed -ri "s|\"size\":.+$|\"size\": ${nfiles}|g" \
+    mRNA.preprocess_seq.json
+sed -ri "s|\"-d\",.+$|\"-d\",\"${dirData}\",|g" \
+    mRNA.preprocess_seq.json
+sed -ri "s|\"-g\",.+$|\"-g\",\"${genome}\"|g" \
+    mRNA.preprocess_seq.json
 
-if $nonHost
-then
-    # modify non-host slurm script
-    sed -ri "s|^#SBATCH --mail-user=.+$|#SBATCH --mail-user=${email}|g" \
-	mRNA.nonHost.slurm
-    sed -ri "s|^#SBATCH --array=1-.+$|#SBATCH --array=1-${batches}|g" \
-	mRNA.nonHost.slurm
-    sed -ri "s|^#SBATCH --depend=afterok:.+$|#SBATCH --depend=afterok:${slurmid}|g" \
-	mRNA.nonHost.slurm
-    # lauch preprocessing slurm script
-    cmd="sbatch mRNA.nonHost.slurm -d $dirData"
+# lauch preprocessing script
+cmd="aws batch submit-job"
+cmd="$cmd --cli-input-json file://mRNA.preprocess_seq.json"
+cmd="$cmd --profile 'tki-aws-account-310-rhedcloud/RHEDcloudAdministratorRole'"
 
-    if $pairEnd
-    then
-	cmd="$cmd -p"
-    fi
+# copy script on mount
+cp mRNA.preprocess_seq.sh /mnt/efs/
 
-    # echo $cmd
-    eval $cmd
-fi
+# echo $cmd
+eval $cmd
+

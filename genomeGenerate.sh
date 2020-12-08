@@ -1,10 +1,6 @@
 #!/bin/bash
-# @author Slim Fourati (sxf279@case.edu)
-# @author Aarthi Talla (axt427@case.edu)
-# @version 0.5
-
-# load apps
-module load STAR/2.7.0e
+# @author Slim Fourati (slim.fourati@emory.edu)
+# @version 0.6
 
 # read input arguments
 compress=false
@@ -19,11 +15,10 @@ do
 done
 
 # set global variables for the script
-bin="/mnt/rstor/SOM_PATH_RXS745U/bin"
-genomeDir="/mnt/rstor/SOM_PATH_RXS745U/genome/${genome}"
+genomeDir="/mnt/genome/${genome}"
 genomeFasta="$genomeDir/Sequence/genome.fa"
 gtfFile="$genomeDir/Annotation/genes.gtf"
-maxProc=8
+maxProc=4
 
 # 1. determine mate length
 if [[ -z $mateLength ]]

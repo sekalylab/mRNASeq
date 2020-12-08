@@ -1,0 +1,24 @@
+{
+    "jobName": "rnaseq-job-TIMESTAMP", 
+    "jobQueue": "gsea-job-queue-3", 
+    "jobDefinition": "rnaseq-job-def-6",
+    "dependsOn": [
+	{ 
+            "jobId": "GENOMEJOBID"
+	}
+    ],
+    "arrayProperties": {
+	"size": "NSAMPLE"
+    },
+    "containerOverrides": {
+	"command": [
+	    "bash",
+	    "/mnt/mRNA.preprocess_seq.sh",
+	    "-d","DIRDATA",
+	    "-g","GENOME"
+        ]
+    },
+    "timeout": {
+        "attemptDurationSeconds": 7200
+    }
+}
