@@ -1,13 +1,13 @@
 {
-    "jobName": "rnaseq-job-TIMESTAMP", 
+    "jobName": "rnaseq-job-202102244214", 
     "jobQueue": "gsea-job-queue-3", 
     "jobDefinition": "rnaseq-job-def-6",
     "containerOverrides": {
 	"command": [
 	    "bash",
 	    "/mnt/genomeGenerate.sh",
-	    "-d","DIRDATA",
-	    "-g","GENOME"
+	    "-d","/mnt/Pascal_RSV_RNAseq/",
+	    "-g","GRCh38"
         ]
     },
     "timeout": {

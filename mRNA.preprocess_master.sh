@@ -5,7 +5,7 @@
 # read input arguments
 email="slim.fourati@emory.edu"
 genome=GRCh38
-acceptedGenome=("GRCh38" "Mmul_10")
+acceptedGenome=("GRCh38" "Mmul_10" "Mnem_1")
 
 while getopts :d:e:g:h option
 do
