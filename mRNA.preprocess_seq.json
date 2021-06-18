@@ -1,21 +1,21 @@
 {
-    "jobName": "rnaseq-job-202102244214", 
+    "jobName": "rnaseq-job-TIMESTAMP", 
     "jobQueue": "gsea-job-queue-3", 
     "jobDefinition": "rnaseq-job-def-6",
     "dependsOn": [
 	{ 
-            "jobId": "ae977084-7107-424d-9f07-716cd636156e"
+            "jobId": "GENOMEJOBID"
 	}
     ],
     "arrayProperties": {
-	"size": 5
+	"size": "NSAMPLE"
     },
     "containerOverrides": {
 	"command": [
 	    "bash",
 	    "/mnt/mRNA.preprocess_seq.sh",
-	    "-d","/mnt/Pascal_RSV_RNAseq/",
-	    "-g","GRCh38"
+	    "-d","DIRDATA",
+	    "-g","GENOME"
         ]
     },
     "timeout": {
