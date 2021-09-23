@@ -3,11 +3,13 @@
 # @version 0.7
 
 # read arguments
-while getopts d:g: option
+isoform=false
+while getopts d:g:i option
 do
     case "$option" in
 	d) dirData=$OPTARG;;
 	g) genome=$OPTARG;;
+	i) isoform=true;;
     esac
 done
 
@@ -74,7 +76,10 @@ then
     fi
     rm ${sample}_starLog.out
     rm ${sample}_starLog.progress.out
-    rm ${sample}_starSJ.out.tab
+    if ! $isoform
+    then
+	rm ${sample}_starSJ.out.tab
+    fi
     rm ${sample}_starUnmapped.out.mate1
     rm ${sample}_starUnmapped.out.mate2
     echo "done"
@@ -152,5 +157,26 @@ then
         $sample.sorted.bam \
         $gtfFile \
         > ${sample}_counts_gene
+    if $isoform
+    then
+	htseq-count \
+            --mode=union \
+            --stranded=$stranded \
+            --idattr=transcript_id \
+	    --format=bam \
+            --quiet \
+            $sample.sorted.bam \
+            $gtfFile \
+            > ${sample}_counts_transcript
+	htseq-count \
+            --mode=union \
+            --stranded=$stranded \
+            --idattr=exon_id \
+	    --format=bam \
+            --quiet \
+            $sample.sorted.bam \
+            $gtfFile \
+            > ${sampleID}_counts_exon
+    fi
     echo "done"
 fi

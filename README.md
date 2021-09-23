@@ -29,5 +29,6 @@ arguments:
 d=[d]irectory with raw data (directory; required)  
 g=reference [g]enome  
     accepted values: GRCh38, Mmul_10
+i=[i]soform transcript/exon counts  
 h=print [h]elp
 ```

@@ -15,10 +15,11 @@
 	    "bash",
 	    "/mnt/mRNA.preprocess_seq.sh",
 	    "-d","DIRDATA",
-	    "-g","GENOME"
-        ]
+	    "-g","GENOME",
+	    "-i"
+	]
     },
     "timeout": {
-        "attemptDurationSeconds": 7200
+        "attemptDurationSeconds": 21600
     }
 }
