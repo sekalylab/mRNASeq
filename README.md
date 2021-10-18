@@ -28,7 +28,10 @@ bash mRNA.preprocessing_master.sh -d {raw_directory}
 arguments:  
 d=[d]irectory with raw data (directory; required)  
 g=reference [g]enome  
-    accepted values: GRCh38, Mmul_10
+    accepted values: GRCh38, Mmul_10, Mnem_1  
+p=p=[p]air-end sequencing files  
+    if arugment -p is not given, single-end sequencing files are  
+    expected  
 i=[i]soform transcript/exon counts  
 h=print [h]elp
 ```
