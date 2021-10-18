@@ -16,10 +16,11 @@
 	    "/mnt/mRNA.preprocess_seq.sh",
 	    "-d","DIRDATA",
 	    "-g","GENOME",
+	    "-p",
 	    "-i"
 	]
     },
     "timeout": {
-        "attemptDurationSeconds": 21600
+        "attemptDurationSeconds": 43200
     }
 }

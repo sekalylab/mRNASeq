@@ -3,12 +3,14 @@
 # @version 0.7
 
 # read arguments
+pairEnd=false
 isoform=false
-while getopts d:g:i option
+while getopts d:g:pi option
 do
     case "$option" in
 	d) dirData=$OPTARG;;
 	g) genome=$OPTARG;;
+	p) pairEnd=true;;
 	i) isoform=true;;
     esac
 done
@@ -60,28 +62,49 @@ if $flag
 then
     currentDate=$(date +"%Y-%m-%d %X")
     echo -ne "$currentDate: alignment of reads..."
-    STAR --genomeDir $genomeDir \
-	 --genomeLoad LoadAndRemove \
-	 --readFilesIn ${sample}_1.fq.gz \
-		 ${sample}_2.fq.gz \
-		 --readFilesCommand zcat \
-	  	 --runThreadN $maxProc \
- 		 --outSAMtype BAM Unsorted \
-		 --outFileNamePrefix ${sample}_star \
-		 --outReadsUnmapped Fastx &>/dev/null
-    if [ $? != 0 ]
+    if $pairEnd
     then
-	echo -ne "error\n  unable to aligned read in directory $sample"
-	exit 1
+	STAR --genomeDir $genomeDir \
+	     --genomeLoad LoadAndRemove \
+	     --readFilesIn ${sample}_1.fq.gz \
+	     ${sample}_2.fq.gz \
+	     --readFilesCommand zcat \
+	     --runThreadN $maxProc \
+ 	     --outSAMtype BAM Unsorted \
+	     --outFileNamePrefix ${sample}_star \
+	     --outReadsUnmapped Fastx &>/dev/null
+	if [ $? != 0 ]
+	then
+	    echo -ne "error\n  unable to aligned read in directory $sample"
+	    exit 1
+	fi
+	rm ${sample}_starLog.out
+	rm ${sample}_starLog.progress.out
+	if ! $isoform
+	then
+	    rm ${sample}_starSJ.out.tab
+	fi
+	rm ${sample}_starUnmapped.out.mate1
+	rm ${sample}_starUnmapped.out.mate2
+    else
+	STAR --genomeDir $genomeDir \
+	     --genomeLoad LoadAndRemove \
+	     --readFilesIn ${sample}_1.fq.gz \
+	     --readFilesCommand zcat \
+	     --runThreadN $maxProc \
+ 	     --outSAMtype BAM Unsorted \
+	     --outFileNamePrefix ${sample}_star \
+	     --outReadsUnmapped Fastx &>/dev/null
+	if [ $? != 0 ]
+            then
+		echo -ne "error\n  unable to aligned read in directory $sample"
+		exit
+            fi
+        # delete raw FASTQ
+        rm ${sample}_starLog.out
+	rm ${sample}_starLog.progress.out
+	rm ${sample}_starUnmapped.out.mate1
     fi
-    rm ${sample}_starLog.out
-    rm ${sample}_starLog.progress.out
-    if ! $isoform
-    then
-	rm ${sample}_starSJ.out.tab
-    fi
-    rm ${sample}_starUnmapped.out.mate1
-    rm ${sample}_starUnmapped.out.mate2
     echo "done"
 fi
 
@@ -176,7 +199,7 @@ then
             --quiet \
             $sample.sorted.bam \
             $gtfFile \
-            > ${sampleID}_counts_exon
+            > ${sample}_counts_exon
     fi
     echo "done"
 fi

@@ -5,15 +5,17 @@
 # read input arguments
 email="slim.fourati@emory.edu"
 genome=GRCh38
+pairEnd=false
 isoform=false
 acceptedGenome=("GRCh38" "Mmul_10" "Mnem_1")
 
-while getopts :d:e:g:ih option
+while getopts :d:e:g:pih option
 do
     case "${option}" in
 	h) echo "Command: bash mRNA.preprocess_master.sh -d {fastq/directoryfastq} ..."
 	    echo "argument: d=[d]irectory with raw data (required)"
 	    echo "          g=reference [g]enome"
+	    echo "          p=[p]aired-end sequencing"
 	    echo "          i=[i]soform transcript/exon counts"
 	    echo "          h=print [h]elp"
 	    exit 1;;
@@ -25,6 +27,7 @@ do
 		echo "Invalid -g argument: choose between ${acceptedGenome[@]}"
 		exit 1
 	    fi;;
+	p) pairEnd=true;;
 	i) isoform=true;;
 	\?) echo "Invalid option: -$OPTARG"
 	    exit 1;;
@@ -83,12 +86,14 @@ sed -ri "s|\"size\":.+$|\"size\": ${nfiles}|g" \
 sed -ri "s|\"-d\",.+$|\"-d\",\"${dirData}\",|g" \
     mRNA.preprocess_seq.json
 sed -ri "s|\"-g\",.+$|\"-g\",\"${genome}\",|g" \
-	mRNA.preprocess_seq.json
+    mRNA.preprocess_seq.json
+if [ ! $pairEnd ]
+then
+    sed -rzi "s|,\n[^\n]+\"-p\"||g" mRNA.preprocess_seq.json
+fi
 if [ ! $isoform ]
 then
-    sed -ri "s|\"-g\",.+$|\"-g\",\"${genome}\"|g" \
-        mRNA.preprocess_seq.json
-    sed -rzi "s|\"-i\"\n||g" mRNA.preprocess_seq.json
+    sed -rzi "s|,\n[^\n]+\"-i\"||g" mRNA.preprocess_seq.json
 fi
 
 # lauch preprocessing script

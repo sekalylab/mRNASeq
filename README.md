@@ -2,7 +2,7 @@
 Contains scripts for mRNA-Seq preprocessing
 
 <!-- badges: start -->
-![GitHub last commit](https://img.shields.io/github/last-commit/sekalylab/mRNAseq)
+![GitHub last commit](https://img.shields.io/github/last-commit/sekalylab/mRNAseq/aws)
 <!-- badges: end -->
 
 ## Dependencies
