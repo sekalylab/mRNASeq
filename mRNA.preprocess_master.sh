@@ -87,11 +87,11 @@ sed -ri "s|\"-d\",.+$|\"-d\",\"${dirData}\",|g" \
     mRNA.preprocess_seq.json
 sed -ri "s|\"-g\",.+$|\"-g\",\"${genome}\",|g" \
     mRNA.preprocess_seq.json
-if [ ! $pairEnd ]
+if ! $pairEnd
 then
     sed -rzi "s|,\n[^\n]+\"-p\"||g" mRNA.preprocess_seq.json
 fi
-if [ ! $isoform ]
+if ! $isoform
 then
     sed -rzi "s|,\n[^\n]+\"-i\"||g" mRNA.preprocess_seq.json
 fi
@@ -106,4 +106,3 @@ cp mRNA.preprocess_seq.sh /mnt/efs/
 
 # echo $cmd
 eval $cmd
-

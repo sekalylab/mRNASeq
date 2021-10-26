@@ -23,7 +23,8 @@ bedFile="$seqDependencies/Annotation/genes.bed"
 maxProc=4
 stranded="no"
 
-# identify sample of interest
+
+# 1. Identify sample of interest
 fastq=$(find $dirData -maxdepth 1 -name '*_1.fq.gz')
 fastq=( $(echo $fastq | \
 	      tr ' ' '\n' | \
@@ -31,6 +32,7 @@ fastq=( $(echo $fastq | \
 	      uniq) )
 fastq=${fastq[$AWS_BATCH_JOB_ARRAY_INDEX]}
 sample=$(echo $fastq | sed -r "s|_1.fq.gz||g")
+
 
 # 2. Determine mate length
 flag=true
@@ -47,7 +49,8 @@ then
     genomeDir="$seqDependencies/ggOverhang$(($mateLength -1))"
 fi
 
-# 7. Alignment with 'STAR'
+
+# 3. Alignment with 'STAR'
 # Alignment of the reads to the reference genome.
 # The genome is loaded into memory for alignment.
 # After the end of alignment, the genome is removed from shared memory.
@@ -75,7 +78,7 @@ then
 	     --outReadsUnmapped Fastx &>/dev/null
 	if [ $? != 0 ]
 	then
-	    echo -ne "error\n  unable to aligned read in directory $sample"
+	    echo -ne "error\n  unable to aligned reads for sample $sample"
 	    exit 1
 	fi
 	rm ${sample}_starLog.out
@@ -97,7 +100,7 @@ then
 	     --outReadsUnmapped Fastx &>/dev/null
 	if [ $? != 0 ]
             then
-		echo -ne "error\n  unable to aligned read in directory $sample"
+		echo -ne "error\n  unable to aligned reads for sample $sample"
 		exit
             fi
         # delete raw FASTQ
@@ -108,24 +111,35 @@ then
     echo "done"
 fi
 
-# 10. Order BAM file by name
+
+# 4. Order BAM file by position
 flag=true
 if $flag
 then
     currentDate=$(date +"%Y-%m-%d %X")
     echo -ne "$currentDate: sorting bam file by name..."
     samtools sort \
-	     -n \
 	     -@ $maxProc \
 	     -o $sample.sorted.bam \
 	     ${sample}_starAligned.out.bam &>/dev/null
-        # delete unsorted bam
+    # delete unsorted bam
     rm ${sample}_starAligned.out.bam
     echo "done"
 fi
 
 
-# 11. RSeQC to infer if dataset is strand-specific
+# 5. Index BAM files
+flag=true
+if $flag
+then
+    currentDate=$(date +"%Y-%m-%d %X")
+    echo -ne "$currentDate: indexing bam files..."
+    samtools index ${sample}.sorted.bam &>/dev/null
+    echo "done"
+fi
+
+
+# 6. RSeQC to infer if dataset is strand-specific
 flag=true
 if $flag
 then
@@ -151,11 +165,12 @@ then
     then
         stranded="reverse"
     fi
+    
     echo "done"
 fi
 
 
-# 12. Estimating transcript abundance with "HTSeq"
+# 7. Estimating transcript abundance with "HTSeq"
 # Given a file with aligned reads and the list of genomic features, the number
 # of reads mapped to each feature is counted, which accounts for the transcript
 # abundance estimation. For each position 'i' in the read, a set S(i) is the
@@ -176,6 +191,7 @@ then
         --stranded=$stranded \
         --idattr=gene_id \
 	--format=bam \
+	--order=pos \
         --quiet \
         $sample.sorted.bam \
         $gtfFile \
@@ -187,6 +203,7 @@ then
             --stranded=$stranded \
             --idattr=transcript_id \
 	    --format=bam \
+	    --order=pos \
             --quiet \
             $sample.sorted.bam \
             $gtfFile \
@@ -196,6 +213,7 @@ then
             --stranded=$stranded \
             --idattr=exon_id \
 	    --format=bam \
+	    --order=pos \
             --quiet \
             $sample.sorted.bam \
             $gtfFile \
