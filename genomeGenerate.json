@@ -3,6 +3,7 @@
     "jobQueue": "gsea-job-queue-3", 
     "jobDefinition": "rnaseq-job-def-6",
     "containerOverrides": {
+	"memory": 48000,
 	"command": [
 	    "bash",
 	    "/mnt/genomeGenerate.sh",
