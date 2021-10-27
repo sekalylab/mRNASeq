@@ -89,6 +89,7 @@ then
 	fi
 	rm ${sample}_starUnmapped.out.mate1
 	rm ${sample}_starUnmapped.out.mate2
+	rmdir ${sample}_star_STARtmp
     else
 	STAR --genomeDir $genomeDir \
 	     --genomeLoad LoadAndRemove \
@@ -107,6 +108,7 @@ then
         rm ${sample}_starLog.out
 	rm ${sample}_starLog.progress.out
 	rm ${sample}_starUnmapped.out.mate1
+	rmdir ${sample}_star_STARtmp
     fi
     echo "done"
 fi
