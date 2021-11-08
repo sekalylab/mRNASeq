@@ -1,0 +1,7 @@
+{
+    "Name": "rule-TIMESTAMP", 
+    "EventPattern": "{\"source\":[\"aws.batch\"],\"detail-type\":[\"Batch Job State Change\"],\"detail\":{\"jobId\":[\"JOBID\"],\"status\":[\"FAILED\",\"SUCCEEDED\"]}}", 
+    "State": "ENABLED", 
+    "Description": "JOBID", 
+    "EventBusName": "default"
+}

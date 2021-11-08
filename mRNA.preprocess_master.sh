@@ -76,6 +76,49 @@ jobid=$(eval $cmd | \
 	    grep jobId | \
 	    sed -r 's|.+jobId\": \"(.+)\"$|\1|g')
 
+# modify rule.json
+ruleName="rule-$(date +%Y%m%d%M%S)"
+sed -ri "s|\"Name\":.+$|\"Name\": \"${ruleName}\",|g" \
+    rule.json
+sed -ri "s|\"jobId\\\\\":[^,]+|\"jobId\\\\\":[\\\\\"${jobid}\\\\\"]|g" \
+    rule.json
+sed -ri "s|\"Description\":.+$|\"Description\": \"${jobid}\",|g" \
+    rule.json
+
+# register rule
+aws events put-rule \
+    --cli-input-json file://rule.json \
+    --profile "tki-aws-account-310-rhedcloud/RHEDcloudAdministratorRole"
+
+# register topic
+cmd="aws sns create-topic"
+cmd="$cmd --name 'job-$(date +%Y%m%d%M%S)'"
+cmd="$cmd --profile 'tki-aws-account-310-rhedcloud/RHEDcloudAdministratorRole'"
+topicArn=$(eval $cmd | \
+            grep TopicArn | \
+            sed -r 's|.+TopicArn\": \"(.+)\"$|\1|g')
+
+# add iam role to allow notification
+attributeValue="{\"Version\":\"2012-10-17\",\"Id\":\"__default_policy_ID\",\"Statement\":[{\"Sid\":\"__default_statement_ID\",\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"*\"},\"Action\":[\"SNS:GetTopicAttributes\",\"SNS:SetTopicAttributes\",\"SNS:AddPermission\",\"SNS:RemovePermission\",\"SNS:DeleteTopic\",\"SNS:Subscribe\",\"SNS:ListSubscriptionsByTopic\",\"SNS:Publish\",\"SNS:Receive\"],\"Resource\":\"${topicArn}\",\"Condition\":{\"StringEquals\":{\"AWS:SourceOwner\":\"943708588556\"}}},{\"Sid\":\"AWSEvents_${ruleName}_1\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"events.amazonaws.com\"},\"Action\":\"sns:Publish\",\"Resource\":\"${topicArn}\"}]}"
+aws sns set-topic-attributes \
+    --topic-arn "$topicArn" \
+    --attribute-name "Policy" \
+    --attribute-value "$attributeValue" \
+    --profile "tki-aws-account-310-rhedcloud/RHEDcloudAdministratorRole"
+
+# add target to rule
+aws events put-targets \
+    --rule "$ruleName" \
+    --targets "Id"=1,"Arn"="$topicArn" \
+    --profile "tki-aws-account-310-rhedcloud/RHEDcloudAdministratorRole"
+
+# create subscription
+aws sns subscribe \
+    --topic-arn "$topicArn" \
+    --protocol "email" \
+    --notification-endpoint "$email" \
+    --profile "tki-aws-account-310-rhedcloud/RHEDcloudAdministratorRole"
+
 # modify preprocessing json
 sed -ri "s|\"jobName\": \"rnaseq-job-TIMESTAMP\",|\"jobName\": \"rnaseq-job-$(date +%Y%m%d%M%S)\",|g" \
     mRNA.preprocess_seq.json
@@ -105,4 +148,36 @@ cmd="$cmd --profile 'tki-aws-account-310-rhedcloud/RHEDcloudAdministratorRole'"
 cp mRNA.preprocess_seq.sh /mnt/efs/
 
 # echo $cmd
-eval $cmd
+jobid=$(eval $cmd | \
+            grep jobId | \
+            sed -r 's|.+jobId\": \"(.+)\"$|\1|g')
+
+# modify rule.json
+ruleName="rule-$(date +%Y%m%d%M%S)"
+sed -ri "s|\"Name\":.+$|\"Name\": \"${ruleName}\",|g" \
+    rule.json
+sed -ri "s|\"jobId\\\\\":[^,]+|\"jobId\\\\\":[\\\\\"${jobid}\\\\\"]|g" \
+    rule.json
+sed -ri "s|\"Description\":.+$|\"Description\": \"${jobid}\",|g" \
+    rule.json
+
+# register rule
+aws events put-rule \
+    --cli-input-json file://rule.json \
+    --profile "tki-aws-account-310-rhedcloud/RHEDcloudAdministratorRole"
+
+# add iam role to allow notification
+attributeValue=$(echo $attributeValue |
+		     sed -r "s|]}$||g")
+attributeValue="${attributeValue},{\"Sid\":\"AWSEvents_${ruleName}_1\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"events.amazonaws.com\"},\"Action\":\"sns:Publish\",\"Resource\":\"${topicArn}\"}]}"
+aws sns set-topic-attributes \
+    --topic-arn "$topicArn" \
+    --attribute-name "Policy" \
+    --attribute-value "$attributeValue" \
+    --profile "tki-aws-account-310-rhedcloud/RHEDcloudAdministratorRole"
+
+# add target to rule
+aws events put-targets \
+    --rule "$ruleName" \
+    --targets "Id"=1,"Arn"="$topicArn" \
+    --profile "tki-aws-account-310-rhedcloud/RHEDcloudAdministratorRole"
