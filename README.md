@@ -8,7 +8,7 @@ Contains scripts for mRNA-Seq preprocessing
 ## Dependencies
 - RSeQC (version 4.0.0)  
 - STAR aligner (version 2.7.10a)  
-- HTSeq (version 1.99.2)  
+- HTSeq (version 2.0.2)  
 
 ## Usage
 #### Rename raw sequencing files
