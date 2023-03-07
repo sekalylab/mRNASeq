@@ -17,7 +17,8 @@
 	    "-d","DIRDATA",
 	    "-g","GENOME",
 	    "-p",
-	    "-i"
+	    "-i",
+	    "-n"
 	]
     },
     "timeout": {

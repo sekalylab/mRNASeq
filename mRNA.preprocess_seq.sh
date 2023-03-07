@@ -5,13 +5,15 @@
 # read arguments
 pairEnd=false
 isoform=false
-while getopts d:g:pi option
+nonHost=false
+while getopts d:g:pin option
 do
     case "$option" in
 	d) dirData=$OPTARG;;
 	g) genome=$OPTARG;;
 	p) pairEnd=true;;
 	i) isoform=true;;
+	n) nonHost=true;;
     esac
 done
 
@@ -87,8 +89,11 @@ then
 	then
 	    rm ${sample}_starSJ.out.tab
 	fi
-	rm ${sample}_starUnmapped.out.mate1
-	rm ${sample}_starUnmapped.out.mate2
+	if ! $nonHost
+	then
+	    rm ${sample}_starUnmapped.out.mate1
+	    rm ${sample}_starUnmapped.out.mate2
+	fi
 	rmdir ${sample}_star_STARtmp
     else
 	STAR --genomeDir $genomeDir \
@@ -107,7 +112,10 @@ then
         # delete raw FASTQ
         rm ${sample}_starLog.out
 	rm ${sample}_starLog.progress.out
-	rm ${sample}_starUnmapped.out.mate1
+	if ! $nonHost
+        then
+	    rm ${sample}_starUnmapped.out.mate1
+	fi
 	rmdir ${sample}_star_STARtmp
     fi
     echo "done"
@@ -220,6 +228,39 @@ then
             $sample.sorted.bam \
             $gtfFile \
             > ${sample}_counts_exon
+    fi
+    echo "done"
+fi
+
+# 8. Non-host reads alignment to human,viral,bacteria
+if $nonHost
+then
+    currentDate=$(date +"%Y-%m-%d %X")
+    echo -ne "$currentDate: aligning with kraken2..."
+    if $pairEnd
+    then
+	kraken2 \
+	    --db /mnt/genome/kraken2-db \
+	    --paired \
+	    ${sample}_starUnmapped.out.mate1 \
+	    ${sample}_starUnmapped.out.mate2 \
+	    --output $sample.kraken2.out \
+	    --report $sample.kraken2.report \
+	    --report-zero-counts \
+	    --threads $maxProc
+	# clean up
+	rm ${sample}_starUnmapped.out.mate1
+	rm ${sample}_starUnmapped.out.mate2
+    else
+	kraken2 \
+            --db /mnt/genome/kraken2-db \
+            ${sample}_starUnmapped.out.mate1 \
+	    --output $sample.kraken2.out \
+            --report $sample.kraken2.report \
+            --report-zero-counts \
+            --threads $maxProc
+        # clean up                                                             
+        rm ${sample}_starUnmapped.out.mate1
     fi
     echo "done"
 fi

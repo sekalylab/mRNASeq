@@ -7,9 +7,10 @@ email="slim.fourati@emory.edu"
 genome=GRCh38
 pairEnd=false
 isoform=false
+nonHost=false
 acceptedGenome=("GRCh38" "Mmul_10" "Mnem_1")
 
-while getopts :d:e:g:pih option
+while getopts :d:e:g:pinh option
 do
     case "${option}" in
 	h) echo "Command: bash mRNA.preprocess_master.sh -d {fastq/directoryfastq} ..."
@@ -17,6 +18,7 @@ do
 	    echo "          g=reference [g]enome"
 	    echo "          p=[p]aired-end sequencing"
 	    echo "          i=[i]soform transcript/exon counts"
+	    echo "          n=align [n]on-host reads to ncbi nt database"
 	    echo "          h=print [h]elp"
 	    exit 1;;
 	d) dirFastq=$OPTARG;;
@@ -29,6 +31,7 @@ do
 	    fi;;
 	p) pairEnd=true;;
 	i) isoform=true;;
+	n) nonHost=true;;
 	\?) echo "Invalid option: -$OPTARG"
 	    exit 1;;
 	:)
@@ -137,6 +140,10 @@ fi
 if ! $isoform
 then
     sed -rzi "s|,\n[^\n]+\"-i\"||g" mRNA.preprocess_seq.json
+fi
+if ! $nonHost
+then
+    sed -rzi "s|,\n[^\n]+\"-n\"||g" mRNA.preprocess_seq.json
 fi
 
 # lauch preprocessing script
